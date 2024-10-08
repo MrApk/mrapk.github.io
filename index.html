@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer with Speech</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            flex-direction: column;
+        }
+
+        #data {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        input {
+            width: 100px;
+            height: 30px;
+            text-align: center;
+            font-size: 20px;
+            border-radius: 5px;
+            margin: 0 10px;
+            border: 3px solid #ccc;
+        }
+        #text {
+            font-size: 25px;
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        #timer {
+            font-size: 48px;
+        }
+        #controls {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="data">
+    <div id="text">Work (mins): <input type="number" id="workMinutes" value="25"></div>
+    <div id="text">Break (mins): <input type="number" id="breakMinutes" value="5"></div>
+</div>
+<div id="timer">00:00</div>
+
+<div id="session-type">Session: Work</div>
+
+<div id="controls">
+    <button onclick="startTimer()">Start</button>
+    <button onclick="stopTimer()">Stop</button>
+    <button onclick="resetTimer()">Reset</button>
+</div>
+
+<script>
+    var timerDisplay = document.getElementById('timer');
+    var sessionTypeDisplay = document.getElementById('session-type');
+    var interval;
+    var time; // Store the remaining time
+    var isWorkSession = true; // Keep track of whether it's a work or break session
+
+    function startTimer() {
+        if (time === undefined) {
+            var workMinutes = document.getElementById('workMinutes').value;
+            var breakMinutes = document.getElementById('breakMinutes').value;
+
+            // Convert work time to total seconds (only if it's a work session)
+            if (isWorkSession) {
+                time = parseInt(workMinutes) * 60;
+                sessionTypeDisplay.textContent = "Session: Work";
+            } else {
+                time = parseInt(breakMinutes) * 60;
+                sessionTypeDisplay.textContent = "Session: Break";
+            }
+        }
+
+        clearInterval(interval);
+        interval = setInterval(function () {
+            var minutes = Math.floor(time / 60);
+            var seconds = time % 60;
+
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            timerDisplay.textContent = minutes + ':' + seconds;
+
+            if (time <= 0) {
+                clearInterval(interval);
+
+                // Call the speech synthesis function
+                announceSessionEnd();
+
+                // Switch session type (Work -> Break, Break -> Work)
+                isWorkSession = !isWorkSession;
+
+                // Automatically start the next session
+                time = undefined; // Reset time to undefined to trigger session switch
+                startTimer(); // Start the next session
+            }
+
+            time--;
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(interval);
+    }
+
+    function resetTimer() {
+        clearInterval(interval);
+        timerDisplay.textContent = "00:00";
+        sessionTypeDisplay.textContent = "Session: Work";
+        time = undefined;
+        isWorkSession = true; // Reset to work session
+    }
+
+    // Function to announce the end of a session
+    function announceSessionEnd() {
+        var message;
+        if (isWorkSession) {
+            message = "Work session complete. Time for a break!";
+        } else {
+            message = "Break time is over. Time to work!";
+        }
+
+        // Speech synthesis
+        var utterance = new SpeechSynthesisUtterance(message);
+        window.speechSynthesis.speak(utterance);
+    }
+</script>
+
+</body>
+</html>
