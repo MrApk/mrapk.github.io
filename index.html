@@ -219,49 +219,64 @@
     
     // Start the timer and store the start time
     function startTimer() {
+        // If there's no ongoing timer session, start a new one
         if (time === undefined) {
             var workMinutes = document.getElementById('workMinutes').value;
             var breakMinutes = document.getElementById('breakMinutes').value;
     
+            // Set the timer based on whether it's a work session or break session
             if (isWorkSession) {
-                time = parseInt(workMinutes) * 60;
+                time = parseInt(workMinutes) * 60;  // Work session time in seconds
                 sessionTypeDisplay.textContent = "Session: Work";
             } else {
-                time = parseInt(breakMinutes) * 60;
+                time = parseInt(breakMinutes) * 60;  // Break session time in seconds
                 sessionTypeDisplay.textContent = "Session: Break";
             }
     
+            // Store the start time to calculate remaining time later
             timerStartTime = Date.now();
             localStorage.setItem('timerStartTime', timerStartTime);
             localStorage.setItem('time', time);
             localStorage.setItem('isWorkSession', isWorkSession);
         }
     
+        // Prevent multiple intervals from running
         clearInterval(interval);
+    
+        // Calculate the remaining time dynamically based on the start time
         interval = setInterval(function () {
+            // Calculate the remaining time using the elapsed time
             time = calculateRemainingTime();
     
+            // If time is less than zero, reset the time to zero to avoid negative display
+            if (time <= 0) {
+                clearInterval(interval);
+    
+                // Announce the end of the current session
+                announceSessionEnd();
+    
+                // Toggle between work and break session
+                isWorkSession = !isWorkSession;
+    
+                // Reset time and start the next session
+                time = undefined;
+                localStorage.removeItem('timerStartTime'); // Clear saved start time
+                startTimer(); // Start the next session automatically
+                return; // Exit the function to prevent further execution
+            }
+    
+            // Format minutes and seconds for display
             var minutes = Math.floor(time / 60);
             var seconds = time % 60;
     
             minutes = minutes < 10 ? '0' + minutes : minutes;
             seconds = seconds < 10 ? '0' + seconds : seconds;
     
+            // Update the timer display
             timerDisplay.textContent = minutes + ':' + seconds;
-    
-            if (time <= 0) {
-                clearInterval(interval);
-    
-                announceSessionEnd();
-    
-                isWorkSession = !isWorkSession;
-                time = undefined;
-                localStorage.removeItem('timerStartTime');
-                startTimer();
-            }
         }, 1000);
-    }
-    
+}
+
     function stopTimer() {
         clearInterval(interval);
         localStorage.removeItem('timerStartTime'); // Clear saved state when stopped
