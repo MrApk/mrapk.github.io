@@ -196,12 +196,17 @@
     var timerDisplay = document.getElementById('timer');
     var sessionTypeDisplay = document.getElementById('session-type');
     var interval;
-    var time; // Store the remaining time
-    var isWorkSession = true; // Keep track of whether it's a work or break session
+    var time;
+    var isWorkSession = true;
 
-    // Request notification permission on load (but check if supported)
-    if ("Notification" in window && Notification.permission !== 'granted') {
-        Notification.requestPermission();
+    // Register the service worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+            .then(function(registration) {
+                console.log('Service Worker registered with scope:', registration.scope);
+            }).catch(function(error) {
+                console.log('Service Worker registration failed:', error);
+            });
     }
 
     function startTimer() {
@@ -209,7 +214,6 @@
             var workMinutes = document.getElementById('workMinutes').value;
             var breakMinutes = document.getElementById('breakMinutes').value;
 
-            // Convert work time to total seconds (only if it's a work session)
             if (isWorkSession) {
                 time = parseInt(workMinutes) * 60;
                 sessionTypeDisplay.textContent = "Session: Work";
@@ -236,15 +240,11 @@
             if (time <= 0) {
                 clearInterval(interval);
             
-                // Call the speech synthesis function
                 announceSessionEnd();
 
-                // Switch session type (Work -> Break, Break -> Work)
                 isWorkSession = !isWorkSession;
-
-                // Automatically start the next session
-                time = undefined; // Reset time to undefined to trigger session switch
-                startTimer(); // Start the next session
+                time = undefined;
+                startTimer();
             }
             
             time--;
@@ -260,10 +260,9 @@
         timerDisplay.textContent = "00:00";
         sessionTypeDisplay.textContent = "Session: Work";
         time = undefined;
-        isWorkSession = true; // Reset to work session
+        isWorkSession = true;
     }
     
-    // Function to announce the end of a session
     function announceSessionEnd() {
         var message;
         if (isWorkSession) {
@@ -272,18 +271,22 @@
             message = "Break time is over. Time to work!";
         }
 
-        // Speech synthesis
         var utterance = new SpeechSynthesisUtterance(message);
         window.speechSynthesis.speak(utterance);
         alert(message);
     }
 
-    // Function to show notification (with mobile fallback)
+    // Function to show notification using the ServiceWorker
     function notifyUser(message) {
-        if ("Notification" in window && Notification.permission === 'granted') {
-            new Notification(message);
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(function(registration) {
+                registration.showNotification('Pomodoro Timer', {
+                    body: message,
+                    icon: 'icon.png' // Optional: Add an icon if you want
+                });
+            });
         } else {
-            // Fallback for mobile: use alerts
+            // Fallback for unsupported browsers
             alert(message);
         }
     }
