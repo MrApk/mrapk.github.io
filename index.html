@@ -52,8 +52,13 @@
                 );
             background-size: var(--s) calc(var(--s) / 0.577);
             /* 0.577=tan(30deg)*/
-        }
 
+            background-repeat: repeat;
+        }
+        a {
+            text-decoration: none;
+            color: #000000;
+        }
         #data {
             display: flex;
             flex-direction: column;
@@ -85,10 +90,6 @@
 
         #timer {
             font-size: 3rem; /* Scales for both mobile and desktop */
-        }
-        a{
-            color: #000000;
-            text-decoration: none;
         }
 
         #session-type {
@@ -141,14 +142,12 @@
             -ms-user-select: none; /* IE 10 and IE 11 */
             user-select: none; /* Standard syntax */
         }
-
-        div {
+        div{
             cursor: default;
             -webkit-user-select: none; /* Safari */
             -ms-user-select: none; /* IE 10 and IE 11 */
             user-select: none; /* Standard syntax */
         }
-
         /* Media query for smaller screens */
         @media (min-width: 768px) {
             input {
@@ -193,7 +192,6 @@
     <button onclick="resetTimer()">Reset</button>
 </div>
 
-
 <script>
     var timerDisplay = document.getElementById('timer');
     var sessionTypeDisplay = document.getElementById('session-type');
@@ -201,8 +199,8 @@
     var time; // Store the remaining time
     var isWorkSession = true; // Keep track of whether it's a work or break session
 
-    // Request notification permission on load
-    if (Notification.permission !== 'granted') {
+    // Request notification permission on load (but check if supported)
+    if ("Notification" in window && Notification.permission !== 'granted') {
         Notification.requestPermission();
     }
 
@@ -232,7 +230,7 @@
             timerDisplay.textContent = minutes + ':' + seconds;
 
             if (time > 0 && time % 60 === 0) {
-                showNotification(minutes + " minutes left");
+                notifyUser(minutes + " minutes left");
             }
 
             if (time <= 0) {
@@ -280,10 +278,13 @@
         alert(message);
     }
 
-    // Function to show notification
-    function showNotification(message) {
-        if (Notification.permission === 'granted') {
+    // Function to show notification (with mobile fallback)
+    function notifyUser(message) {
+        if ("Notification" in window && Notification.permission === 'granted') {
             new Notification(message);
+        } else {
+            // Fallback for mobile: use alerts
+            alert(message);
         }
     }
 </script>
