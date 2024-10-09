@@ -201,6 +201,11 @@
     var time; // Store the remaining time
     var isWorkSession = true; // Keep track of whether it's a work or break session
 
+    // Request notification permission on load
+    if (Notification.permission !== 'granted') {
+        Notification.requestPermission();
+    }
+
     function startTimer() {
         if (time === undefined) {
             var workMinutes = document.getElementById('workMinutes').value;
@@ -225,6 +230,10 @@
             seconds = seconds < 10 ? '0' + seconds : seconds;
 
             timerDisplay.textContent = minutes + ':' + seconds;
+
+            if (time > 0 && time % 60 === 0) {
+                showNotification(minutes + " minutes left");
+            }
 
             if (time <= 0) {
                 clearInterval(interval);
@@ -269,6 +278,13 @@
         var utterance = new SpeechSynthesisUtterance(message);
         window.speechSynthesis.speak(utterance);
         alert(message);
+    }
+
+    // Function to show notification
+    function showNotification(message) {
+        if (Notification.permission === 'granted') {
+            new Notification(message);
+        }
     }
 </script>
 
