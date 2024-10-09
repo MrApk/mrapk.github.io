@@ -196,9 +196,10 @@
     var timerDisplay = document.getElementById('timer');
     var sessionTypeDisplay = document.getElementById('session-type');
     var interval;
-    var time;
-    var isWorkSession = true;
-
+    var time; // Store the remaining time in seconds
+    var isWorkSession = true; // Keep track of whether it's a work or break session
+    var timerStartTime;
+    
     // Register the service worker
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js')
@@ -208,12 +209,20 @@
                 console.log('Service Worker registration failed:', error);
             });
     }
-
+    
+    // Function to calculate remaining time based on the current time and start time
+    function calculateRemainingTime() {
+        var currentTime = Date.now();
+        var elapsedTime = Math.floor((currentTime - timerStartTime) / 1000); // Elapsed time in seconds
+        return time - elapsedTime; // Remaining time
+    }
+    
+    // Start the timer and store the start time
     function startTimer() {
         if (time === undefined) {
             var workMinutes = document.getElementById('workMinutes').value;
             var breakMinutes = document.getElementById('breakMinutes').value;
-
+    
             if (isWorkSession) {
                 time = parseInt(workMinutes) * 60;
                 sessionTypeDisplay.textContent = "Session: Work";
@@ -221,48 +230,65 @@
                 time = parseInt(breakMinutes) * 60;
                 sessionTypeDisplay.textContent = "Session: Break";
             }
+    
+            timerStartTime = Date.now();
+            localStorage.setItem('timerStartTime', timerStartTime);
+            localStorage.setItem('time', time);
+            localStorage.setItem('isWorkSession', isWorkSession);
         }
-
+    
         clearInterval(interval);
         interval = setInterval(function () {
+            time = calculateRemainingTime();
+    
             var minutes = Math.floor(time / 60);
             var seconds = time % 60;
-            
+    
             minutes = minutes < 10 ? '0' + minutes : minutes;
             seconds = seconds < 10 ? '0' + seconds : seconds;
-
+    
             timerDisplay.textContent = minutes + ':' + seconds;
-
-            if (time > 0 && time % 60 === 0) {
-                notifyUser(minutes + " minutes left");
-            }
-
+    
             if (time <= 0) {
                 clearInterval(interval);
-            
+    
                 announceSessionEnd();
-
+    
                 isWorkSession = !isWorkSession;
                 time = undefined;
+                localStorage.removeItem('timerStartTime');
                 startTimer();
             }
-            
-            time--;
         }, 1000);
     }
     
     function stopTimer() {
         clearInterval(interval);
+        localStorage.removeItem('timerStartTime'); // Clear saved state when stopped
     }
-
+    
     function resetTimer() {
         clearInterval(interval);
         timerDisplay.textContent = "00:00";
         sessionTypeDisplay.textContent = "Session: Work";
         time = undefined;
         isWorkSession = true;
+        localStorage.removeItem('timerStartTime'); // Clear saved state
+        localStorage.removeItem('time');
+        localStorage.removeItem('isWorkSession');
     }
     
+    // Restore the timer state from localStorage if it exists
+    window.addEventListener('load', function() {
+        if (localStorage.getItem('timerStartTime')) {
+            timerStartTime = parseInt(localStorage.getItem('timerStartTime'));
+            time = parseInt(localStorage.getItem('time'));
+            isWorkSession = localStorage.getItem('isWorkSession') === 'true';
+            startTimer(); // Resume the timer
+        }
+    });
+    
+    // Function to announce the end of a session
     function announceSessionEnd() {
         var message;
         if (isWorkSession) {
@@ -270,12 +296,13 @@
         } else {
             message = "Break time is over. Time to work!";
         }
-
+    
         var utterance = new SpeechSynthesisUtterance(message);
         window.speechSynthesis.speak(utterance);
-        alert(message);
+    
+        notifyUser(message);
     }
-
+    
     // Function to show notification using the ServiceWorker
     function notifyUser(message) {
         if ('serviceWorker' in navigator) {
@@ -286,10 +313,10 @@
                 });
             });
         } else {
-            // Fallback for unsupported browsers
-            alert(message);
+            alert(message); // Fallback for unsupported browsers
         }
     }
+    
 </script>
 
 </body>
