@@ -1,56 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pomodoro Timer with Speech</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer</title>
+    <meta property="og:description" content="Pomodoro Time">
+    <meta property="og:title" content="Pomodoro Timer">
+    <meta property="og:url" content="https://mrapk.github.io/">
+
     <style>
         body {
             display: flex;
             justify-content: center;
             align-items: center;
+            text-align: center;
             height: 100vh;
+            font-size: 1.25rem; /* Scales with screen size */
             font-family: Arial, sans-serif;
             flex-direction: column;
+            background-color: #f5f5f5;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            --s: 105px; /* control the size */
+            --c1: #b9b9b9;
+            --c2: #dcdcdc;
+            --c3: #fafafa;
+
+            background: conic-gradient(
+                    from 75deg,
+                    var(--c1) 15deg,
+                    var(--c2) 0 30deg,
+                    #0000 0 180deg,
+                    var(--c2) 0 195deg,
+                    var(--c1) 0 210deg,
+                    #0000 0
+                )
+                calc(0.5 * var(--s)) calc(0.5 * var(--s) / 0.577),
+                conic-gradient(
+                var(--c1) 30deg,
+                var(--c3) 0 75deg,
+                var(--c1) 0 90deg,
+                var(--c2) 0 105deg,
+                var(--c3) 0 150deg,
+                var(--c2) 0 180deg,
+                var(--c3) 0 210deg,
+                var(--c1) 0 256deg,
+                var(--c2) 0 270deg,
+                var(--c1) 0 286deg,
+                var(--c2) 0 331deg,
+                var(--c3) 0
+                );
+            background-size: var(--s) calc(var(--s) / 0.577);
+            /* 0.577=tan(30deg)*/
         }
 
         #data {
             display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem;
+            
+        }
+
+        input {
+            width: 60%; /* Adjust input width for smaller screens */
+            height: 2.5rem;
+            text-align: center;
+            font-size: 1rem;
+            border-radius: 5px;
+            margin: 0.5rem 0;
+            border: 2px solid #ccc;
+            outline: none;
+        }
+
+        #text {
+            font-size: 1.25rem;
+            margin: 0.5rem;
+            font-weight: bold;
+            color: #000000;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        #timer {
+            font-size: 3rem; /* Scales for both mobile and desktop */
+        }
+
+        #session-type {
+            font-size: 1.5rem;
+            margin-top: 1rem;
+            font-weight: bold;
+            color: #000000;
+            text-align: center;
+        }
+
+        #controls {
+            margin-top: 2rem;
+            display: flex;
             justify-content: center;
             align-items: center;
         }
-        input {
-            width: 100px;
-            height: 30px;
-            text-align: center;
-            font-size: 20px;
-            border-radius: 5px;
-            margin: 0 10px;
-            border: 3px solid #ccc;
-        }
-        #text {
-            font-size: 25px;
-            margin: 0 10px;
-            font-weight: bold;
-        }
-        #timer {
-            font-size: 48px;
-        }
-        #controls {
-            margin-top: 20px;
-        }
+
         button {
-            padding: 10px 20px;
-            font-size: 16px;
-            margin: 0 10px;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            margin: 0.5rem;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:active {
+            background-color: #004080;
+        }
+
+        footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: bold;
+            color: #333;
+            padding: 1rem;
+        }
+
+        /* Media query for smaller screens */
+        @media (min-width: 768px) {
+            input {
+                width: 150px;
+                font-size: 1.5rem;
+            }
+
+            #timer {
+                font-size: 4rem;
+            }
+            #data{
+                flex-direction: row;
+            }
+
+            #session-type {
+                font-size: 2rem;
+            }
+
+            button {
+                font-size: 1.25rem;
+                padding: 1rem 3rem;
+            }
         }
     </style>
 </head>
 <body>
+<div class="container">
 
 <div id="data">
-    <div id="text">Work (mins): <input type="number" id="workMinutes" value="20"></div>
-    <div id="text">Break (mins): <input type="number" id="breakMinutes" value="10"></div>
+    <div id="text">Work (mins): <input type="number" id="workMinutes" value="20" max="60" min="1"></div>
+    <div id="text">Break (mins): <input type="number" id="breakMinutes" value="10" max="60" min="1"></div>
 </div>
+
 <div id="timer">00:00</div>
 
 <div id="session-type">Session: Work</div>
@@ -61,6 +176,8 @@
     <button onclick="resetTimer()">Reset</button>
 </div>
 
+<footer>Created by <a href="https://github.com/mrapk">APK</a></footer>
+</div>
 <script>
     var timerDisplay = document.getElementById('timer');
     var sessionTypeDisplay = document.getElementById('session-type');
@@ -95,7 +212,7 @@
 
             if (time <= 0) {
                 clearInterval(interval);
-
+            
                 // Call the speech synthesis function
                 announceSessionEnd();
 
@@ -135,6 +252,7 @@
         // Speech synthesis
         var utterance = new SpeechSynthesisUtterance(message);
         window.speechSynthesis.speak(utterance);
+        alert(message);
     }
 </script>
 
