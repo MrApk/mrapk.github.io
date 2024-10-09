@@ -320,17 +320,18 @@
     
     // Function to show notification using the ServiceWorker
     function notifyUser(message) {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.ready.then(function(registration) {
-                registration.showNotification('Pomodoro Timer', {
-                    body: message,
-                    icon: 'icon.png' // Optional: Add an icon if you want
-                });
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(function (registration) {
+            registration.active.postMessage({
+                action: 'showNotification',
+                message: message
             });
-        } else {
-            alert(message); // Fallback for unsupported browsers
-        }
+        });
+    } else {
+        alert(message); // Fallback for unsupported browsers
     }
+}
+
     
 </script>
 
