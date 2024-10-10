@@ -8,7 +8,6 @@
     <meta property="og:url" content="https://mrapk.github.io/">
 
     <style>
-      
         body {
             display: flex;
             justify-content: center;
@@ -91,6 +90,9 @@
 
         #timer {
             font-size: 3rem; /* Scales for both mobile and desktop */
+            animation: blink-caret .75s step-end infinite;
+            border-right: .12em solid rgb(126, 125, 124);
+            white-space: nowrap;
         }
 
         #session-type {
@@ -137,7 +139,7 @@
             font-size: 0.875rem;
             font-weight: bold;
             color: #333;
-            padding: 1rem;
+            padding: 0.5rem;
             cursor: default;
             -webkit-user-select: none; /* Safari */
             -ms-user-select: none; /* IE 10 and IE 11 */
@@ -149,13 +151,17 @@
             -ms-user-select: none; /* IE 10 and IE 11 */
             user-select: none; /* Standard syntax */
         }
+        
+        @keyframes blink-caret {
+        from, to { border-color: transparent }
+        50% { border-color: rgb(88, 88, 88); }
+        }
         /* Media query for smaller screens */
-        @media (min-width: 768px) {
+        @media (min-width: 768px){
             input {
                 width: 150px;
                 font-size: 1.5rem;
             }
-
             #timer {
                 font-size: 4rem;
             }
@@ -199,6 +205,18 @@
     var interval;
     var time;
     var isWorkSession = true;
+    var i = 0;
+    var txt;
+    var speed = 100;
+
+    function typeWriter() {
+    
+    if (i < txt.length) {
+        timerDisplay.innerHTML += txt.charAt(i);
+        i++;
+        setTimeout(typeWriter, speed);
+    }
+    }
 
     // Register the service worker
     if ('serviceWorker' in navigator) {
@@ -231,8 +249,10 @@
             
             minutes = minutes < 10 ? '0' + minutes : minutes;
             seconds = seconds < 10 ? '0' + seconds : seconds;
-
-            timerDisplay.textContent = minutes + ':' + seconds;
+            i=0
+            timerDisplay.innerHTML = '';
+            txt = minutes + ':' + seconds;
+            typeWriter();
 
             if (time > 0 && time % 60 === 0) {
                 notifyUser(minutes + " minutes left");
@@ -258,7 +278,10 @@
 
     function resetTimer() {
         clearInterval(interval);
-        timerDisplay.textContent = "00:00";
+        i=0
+        timerDisplay.innerHTML = '';
+        txt = "00:00";
+        typeWriter();
         sessionTypeDisplay.textContent = "Session: Work";
         time = undefined;
         isWorkSession = true;
