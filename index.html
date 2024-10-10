@@ -193,146 +193,99 @@
 </div>
 
 <script>
-    var timerDisplay = document.getElementById('timer');
-    var sessionTypeDisplay = document.getElementById('session-type');
-    var interval;
-    var time; // Store the remaining time in seconds
-    var isWorkSession = true; // Keep track of whether it's a work or break session
-    var timerStartTime;
-    
-    // Register the service worker
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
-            .then(function(registration) {
-                console.log('Service Worker registered with scope:', registration.scope);
-            }).catch(function(error) {
-                console.log('Service Worker registration failed:', error);
-            });
-    }
-    
-    // Function to calculate remaining time based on the current time and start time
-    function calculateRemainingTime() {
-        var currentTime = Date.now();
-        var elapsedTime = Math.floor((currentTime - timerStartTime) / 1000); // Elapsed time in seconds
-        return time - elapsedTime; // Remaining time
-    }
-    
-    // Start the timer and store the start time
-    function startTimer() {
-        // If there's no ongoing timer session, start a new one
-        if (time === undefined) {
-            var workMinutes = document.getElementById('workMinutes').value;
-            var breakMinutes = document.getElementById('breakMinutes').value;
-    
-            // Set the timer based on whether it's a work session or break session
-            if (isWorkSession) {
-                time = parseInt(workMinutes) * 60;  // Work session time in seconds
-                sessionTypeDisplay.textContent = "Session: Work";
+    let timerInterval;
+        let time;
+        let isWorkSession = true;
+
+        // Start Timer Function
+        function startTimer() {
+            if (!time) {
+                // Get the work and break minutes from input fields
+                const workMinutes = parseInt(document.getElementById('workMinutes').value);
+                const breakMinutes = parseInt(document.getElementById('breakMinutes').value);
+
+                // Set initial time for work/break session
+                time = (isWorkSession ? workMinutes : breakMinutes) * 60;
+            }
+
+            // Update the timer every second
+            timerInterval = setInterval(() => {
+                // Decrement time by 1 second
+                time--;
+                // Calculate minutes and seconds
+                const minutes = Math.floor(time / 60);
+                const seconds = time % 60;
+
+                // Update the display
+                document.getElementById('timerDisplay').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                
+                // If time reaches 0, end the session and switch
+                if (time <= 0) {
+                    announceSessionEnd();
+                    switchSession();
+                }
+                else if (time % 60 === 0) {
+                    notifyUser(`${minutes} minute(s) left.`);
+                }
+            }, 1000);
+        }
+
+        // Stop Timer Function
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        // Reset Timer Function
+        function resetTimer() {
+            clearInterval(timerInterval);
+            time = undefined;
+            isWorkSession = true;
+            document.getElementById('timerDisplay').innerText = '25:00';
+            document.getElementById('sessionType').innerText = 'Work';
+        }
+
+        // Switch Session between Work and Break
+        function switchSession() {
+            isWorkSession = !isWorkSession; // Toggle session type
+            document.getElementById('sessionType').innerText = isWorkSession ? 'Work' : 'Break';
+            const sessionMinutes = isWorkSession ? document.getElementById('workMinutes').value : document.getElementById('breakMinutes').value;
+            time = parseInt(sessionMinutes) * 60;
+        }
+
+        // Notify the user via speech synthesis and notification
+        function announceSessionEnd() {
+            const message = isWorkSession ? "Work session complete. Time for a break!" : "Break session complete. Time to work!";
+            speakMessage(message);
+            notifyUser(message);
+        }
+
+        // Browser Speech Synthesis
+        function speakMessage(message) {
+            const utterance = new SpeechSynthesisUtterance(message);
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Browser Notifications (fallback to alert if not supported)
+        function notifyUser(message) {
+            if (Notification.permission === "granted") {
+                new Notification(message);
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        new Notification(message);
+                    } else {
+                        alert(message);
+                    }
+                });
             } else {
-                time = parseInt(breakMinutes) * 60;  // Break session time in seconds
-                sessionTypeDisplay.textContent = "Session: Break";
+                alert(message);
             }
-    
-            // Store the start time to calculate remaining time later
-            timerStartTime = Date.now();
-            localStorage.setItem('timerStartTime', timerStartTime);
-            localStorage.setItem('time', time);
-            localStorage.setItem('isWorkSession', isWorkSession);
         }
-    
-        // Prevent multiple intervals from running
-        clearInterval(interval);
-    
-        // Calculate the remaining time dynamically based on the start time
-        interval = setInterval(function () {
-            // Calculate the remaining time using the elapsed time
-            time = calculateRemainingTime();
-    
-            // If time is less than zero, reset the time to zero to avoid negative display
-            if (time <= 0) {
-                clearInterval(interval);
-    
-                // Announce the end of the current session
-                announceSessionEnd();
-    
-                // Toggle between work and break session
-                isWorkSession = !isWorkSession;
-    
-                // Reset time and start the next session
-                time = undefined;
-                localStorage.removeItem('timerStartTime'); // Clear saved start time
-                startTimer(); // Start the next session automatically
-                return; // Exit the function to prevent further execution
-            }
-    
-            // Format minutes and seconds for display
-            var minutes = Math.floor(time / 60);
-            var seconds = time % 60;
-    
-            minutes = minutes < 10 ? '0' + minutes : minutes;
-            seconds = seconds < 10 ? '0' + seconds : seconds;
-    
-            // Update the timer display
-            timerDisplay.textContent = minutes + ':' + seconds;
-        }, 1000);
-}
 
-    function stopTimer() {
-        clearInterval(interval);
-        localStorage.removeItem('timerStartTime'); // Clear saved state when stopped
-    }
-    
-    function resetTimer() {
-        clearInterval(interval);
-        timerDisplay.textContent = "00:00";
-        sessionTypeDisplay.textContent = "Session: Work";
-        time = undefined;
-        isWorkSession = true;
-        localStorage.removeItem('timerStartTime'); // Clear saved state
-        localStorage.removeItem('time');
-        localStorage.removeItem('isWorkSession');
-    }
-    
-    // Restore the timer state from localStorage if it exists
-    window.addEventListener('load', function() {
-        if (localStorage.getItem('timerStartTime')) {
-            timerStartTime = parseInt(localStorage.getItem('timerStartTime'));
-            time = parseInt(localStorage.getItem('time'));
-            isWorkSession = localStorage.getItem('isWorkSession') === 'true';
-            startTimer(); // Resume the timer
+        // Ask for Notification permission on page load
+        if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+            Notification.requestPermission();
         }
-    });
-    
-    // Function to announce the end of a session
-    function announceSessionEnd() {
-        var message;
-        if (isWorkSession) {
-            message = "Work session complete. Time for a break!";
-        } else {
-            message = "Break time is over. Time to work!";
-        }
-    
-        var utterance = new SpeechSynthesisUtterance(message);
-        window.speechSynthesis.speak(utterance);
-    
-        notifyUser(message);
-    }
-    
-    // Function to show notification using the ServiceWorker
-    function notifyUser(message) {
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.ready.then(function (registration) {
-            registration.active.postMessage({
-                action: 'showNotification',
-                message: message
-            });
-        });
-    } else {
-        alert(message); // Fallback for unsupported browsers
-    }
-}
-
-    
 </script>
 
 </body>
