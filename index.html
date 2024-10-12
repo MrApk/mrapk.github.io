@@ -208,7 +208,19 @@
     var i = 0;
     var txt;
     var speed = 100;
-
+    const originalTitle = document.title;
+    document.addEventListener("visibilitychange", () => {
+                if (document.hidden) {
+                    interval2 = setInterval(function () { 
+                        document.title = 'Time Left⏱: '+txt
+                    if (time <= 0){
+                        clearInterval(interval2);
+                    }}, 1000); // When user leaves
+                } else {
+                    clearInterval(interval2);
+                    document.title = originalTitle; // When user comes back
+                }
+            });
     function typeWriter() {
     
     if (i < txt.length) {
@@ -253,11 +265,9 @@
             timerDisplay.innerHTML = '';
             txt = minutes + ':' + seconds;
             typeWriter();
-
             if (time > 0 && time % 60 === 0) {
                 notifyUser(minutes + " minutes left");
             }
-
             if (time <= 0) {
                 clearInterval(interval);
             
@@ -273,11 +283,13 @@
     }
     
     function stopTimer() {
+        document.title = originalTitle;
         clearInterval(interval);
     }
 
     function resetTimer() {
         clearInterval(interval);
+        document.title = originalTitle;
         i=0
         timerDisplay.innerHTML = '';
         txt = "00:00";
