@@ -1,0 +1,226 @@
+body  {
+  background-color: rgb(240, 255, 221);
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  font-size: 20px;
+  color: rgb(0, 0, 0);
+  text-align: center;
+  margin: 0;
+  padding: 0; 
+  height: 100vh;
+  display: flex;
+  flex-direction: row; 
+  justify-content: center;
+  align-items: center;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+.main {
+  padding: 20px;
+}
+p {
+  transition: linear 10s;
+}
+
+.box {
+  background-color: rgb(255, 255, 255);
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 400px;
+  height: 50px;
+  font-size: 20px;
+  color: rgb(0, 0, 0);
+  text-align: center; 
+}
+
+/* From Uiverse.io by Galahhad */ 
+/* checkbox settings 👇 */
+
+input {
+  --primary-color: #1677ff;
+  --secondary-color: #fff;
+  --primary-hover-color: #4096ff;
+  /* checkbox */
+  --checkbox-diameter: 20px;
+  --checkbox-border-radius: 5px;
+  --checkbox-border-color: #d9d9d9;
+  --checkbox-border-width: 1px;
+  --checkbox-border-style: solid;
+  /* checkmark */
+  --checkmark-size: 1.2;
+}
+
+input, 
+input *, 
+input *::before, 
+input *::after {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: var(--checkbox-diameter);
+  height: var(--checkbox-diameter);
+  border-radius: var(--checkbox-border-radius);
+  background: var(--secondary-color);
+  border: var(--checkbox-border-width) var(--checkbox-border-style) var(--checkbox-border-color);
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+  cursor: pointer;
+  position: relative;
+}
+
+input::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  -webkit-box-shadow: 0 0 0 calc(var(--checkbox-diameter) / 2.5) var(--primary-color);
+  box-shadow: 0 0 0 calc(var(--checkbox-diameter) / 2.5) var(--primary-color);
+  border-radius: inherit;
+  opacity: 0;
+  -webkit-transition: all 0.5s cubic-bezier(0.12, 0.4, 0.29, 1.46);
+  -o-transition: all 0.5s cubic-bezier(0.12, 0.4, 0.29, 1.46);
+  transition: all 0.5s cubic-bezier(0.12, 0.4, 0.29, 1.46);
+}
+
+input::before {
+  top: 40%;
+  left: 50%;
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 7px;
+  border-right: 2px solid var(--secondary-color);
+  border-bottom: 2px solid var(--secondary-color);
+  -webkit-transform: translate(-50%, -50%) rotate(45deg) scale(0);
+  -ms-transform: translate(-50%, -50%) rotate(45deg) scale(0);
+  transform: translate(-50%, -50%) rotate(45deg) scale(0);
+  opacity: 0;
+  -webkit-transition: all 0.1s cubic-bezier(0.71, -0.46, 0.88, 0.6),opacity 0.1s;
+  -o-transition: all 0.1s cubic-bezier(0.71, -0.46, 0.88, 0.6),opacity 0.1s;
+  transition: all 0.1s cubic-bezier(0.71, -0.46, 0.88, 0.6),opacity 0.1s;
+}
+
+/* actions */
+
+input:hover {
+  border-color: var(--primary-color);
+}
+
+input:checked {
+  background: var(--primary-color);
+  border-color: transparent;
+}
+
+input:checked::before {
+  opacity: 1;
+  -webkit-transform: translate(-50%, -50%) rotate(45deg) scale(var(--checkmark-size));
+  -ms-transform: translate(-50%, -50%) rotate(45deg) scale(var(--checkmark-size));
+  transform: translate(-50%, -50%) rotate(45deg) scale(var(--checkmark-size));
+  -webkit-transition: all 0.2s cubic-bezier(0.12, 0.4, 0.29, 1.46) 0.1s;
+  -o-transition: all 0.2s cubic-bezier(0.12, 0.4, 0.29, 1.46) 0.1s;
+  transition: all 0.2s cubic-bezier(0.12, 0.4, 0.29, 1.46) 0.1s;
+}
+
+input:active:not(:checked)::after {
+  -webkit-transition: none;
+  -o-transition: none;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  transition: none;
+  opacity: 1;
+}
+
+/* From Uiverse.io by Mike11jr */ 
+button {
+  width: 65px;
+  height: 20px;
+  cursor: pointer;
+  background-color: #171717;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  transition: all .4s;
+}
+
+button:hover {
+  border-radius: 2.5px;
+  transform: translateY(-10px);
+  box-shadow: 0 3.5px 0 -2px #f85959, 0 7.5px 0 -2px #39a2db, 0 8px 5px -1.5px #39a2db;
+}
+
+button:active {
+  transition: all 0.2s;
+  transform: translateY(-2.5px);
+  box-shadow: 0 1px 0 -1px #f85959,0 4px 0 -2px #39a2db,0 6px 5px -1.5px #39a2db;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  body {
+    font-size: 16px;
+    height: auto;
+    display: flex;
+  flex-direction: column; 
+  justify-content: center;
+  align-items: center;
+  }
+  .main:nth-child(2) {
+    order: -1; /* Move box2 to the top */
+  }
+
+
+  .box {
+    width: 100%;
+    height: auto;
+    font-size: 18px;
+    flex-direction: row;
+  }
+
+  button {
+    width: 80px;
+    height: 30px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 14px;
+    height: auto;
+    display: flex;
+  flex-direction: column; 
+  justify-content: center;
+  align-items: center;
+  }
+  .main:nth-child(2) {
+    order: -1; /* Move box2 to the top */
+  }
+  .box {
+    width: 98%;
+    font-size: 16px;
+    padding: 5px;
+  }
+
+  button {
+    width: 75px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  input {
+    --checkbox-diameter: 16px;
+  }
+}
