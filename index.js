@@ -111,7 +111,7 @@ window.onload = () => {
     document.getElementsByClassName('containersun')[0].hidden = true;
 }   else if (day == 4) {
     document.getElementsByClassName('day')[0].innerHTML = "Thursday";
-    document.getElementsByClassName('containerthur')[0].hidden =true;
+    document.getElementsByClassName('containerthur')[0].hidden = false;
     document.getElementsByClassName('containermon')[0].hidden = true;
     document.getElementsByClassName('containertue')[0].hidden = true;
     document.getElementsByClassName('containerwed')[0].hidden = true;
