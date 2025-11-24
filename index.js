@@ -1,6 +1,98 @@
 const date = new Date()
 const day = date.getDay();
 
+function showOnly(className) {
+    const all = [
+        "containersun",
+        "containermon",
+        "containertue",
+        "containerwed",
+        "containerthur",
+        "containerfri",
+        "containersat"
+    ];
+
+    all.forEach(c => {
+        document.getElementsByClassName(c)[0].hidden = (c !== className);
+    });
+}
+
+function line(l,c){
+    if (document.getElementById(c).checked == true) {
+        document.getElementById(l).style.textDecoration = "line-through";
+        localStorage.setItem(l,'True');
+        localStorage.setItem(c,'True');
+        let value = localStorage.getItem("count");
+
+        if (!value) {
+            // Create only once
+            localStorage.setItem("count", 1);
+            console.log("Created: 1");
+        } else {
+            // Optional increase
+            value = parseInt(value) + 1;
+            localStorage.setItem("count", value);
+            console.log("Updated:", value);
+        }
+    }else{
+            document.getElementById(l).style.textDecoration = "none";
+            localStorage.setItem(l,'False');
+            localStorage.setItem(c,'False');
+            let value = localStorage.getItem("count");
+
+            if (!value) {
+                // Create only once
+                localStorage.setItem("count", 1);
+                console.log("Created: 1");
+            } else {
+                // Optional increase
+                value = parseInt(value) - 1;
+                localStorage.setItem("count", value);
+                console.log("Updated:", value);
+            }
+        }
+}
+
+start = (text,time,btn1,btn2,line,) => {
+    document.getElementsByClassName(btn1)[0].hidden = true;
+    document.getElementsByClassName(btn2)[0].hidden = false;
+    i=setInterval(() => {
+        document.getElementsByClassName(text)[0].innerHTML = time;
+        if (time <= 0) {
+            document.getElementsByClassName(btn1)[0].hidden = true;
+            document.getElementsByClassName(btn2)[0].hidden = false;
+            document.getElementsByClassName(btn1)[0].disabled = true;
+            document.getElementsByClassName(btn2)[0].disabled = true;
+            localStorage.setItem(line,'True');
+            localStorage.setItem(text,'True');
+            localStorage.setItem(btn1,'True');
+            localStorage.setItem(btn2,'True');
+            let value = localStorage.getItem("count");
+
+            if (!value) {
+                // Create only once
+                localStorage.setItem("count", 1);
+                console.log("Created: 1");
+            } else {
+                // Optional increase
+                value = parseInt(value) + 1;
+                localStorage.setItem("count", value);
+                console.log("Updated:", value);
+            }
+            document.getElementById(line).style.textDecoration = "line-through";
+            clearInterval(i);
+            
+        }
+        time--;
+    }, 1000);
+}
+
+stop = (btn1,btn2) => {
+    document.getElementsByClassName(btn1)[0].hidden = false;
+    document.getElementsByClassName(btn2)[0].hidden = true;
+    clearInterval(i);
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded');
 
@@ -20,121 +112,65 @@ window.addEventListener('DOMContentLoaded', () => {
         if (i !== 'lastClearedDate') { // Skip the date key
             const value = localStorage.getItem(i);
             const element = document.getElementById(i);
-
-            if (element) { // Check if the element exists
-                if (value === 'True') {
-                    element.style.textDecoration = "line-through";
-                    element.checked = true;
+            const element2 = document.getElementsByClassName(i)[0];
+            
+            
+            if (element) { 
+            if (value === "True") {
+                element.style.textDecoration = "line-through";
+                element.checked = true;
+            } else {
+                element.style.textDecoration = "none";
+                element.checked = false;
+            }
+        }
+            if (element2){
+                if (i.slice(-4) === "time" && value === "True") {
+                        element2.innerHTML = 0;
+                } else if (i.match(/btn/) && value === "True"){
+                        element2.disabled = true;
                 } else {
-                    element.style.textDecoration = "none";
-                    element.checked = false;
-                }
+                        console.log("Element not found:");
+                    }
             }
         }
     }
 });
-
-line = (l,c) => {
-    if (document.getElementById(c).checked == true) {
-        document.getElementById(l).style.textDecoration = "line-through";
-        localStorage.setItem(l,'True');
-        localStorage.setItem(c,'True');
-    }else{
-        document.getElementById(l).style.textDecoration = "none";
-        localStorage.setItem(l,'False');
-        localStorage.setItem(c,'False');
-    }
-}
-
-
-start = (text, time,btn1,btn2,line) => {
-    document.getElementsByClassName(btn1)[0].hidden = true;
-    document.getElementsByClassName(btn2)[0].hidden = false;
-    i=setInterval(() => {
-        document.getElementsByClassName(text)[0].innerHTML = time;
-        if (time <= 0) {
-            document.getElementsByClassName(btn1)[0].hidden = true;
-            document.getElementsByClassName(btn2)[0].hidden = false;
-            localStorage.setItem(line,'True');
-            document.getElementById(line).style.textDecoration = "line-through";
-            clearInterval(i);
-            
-        }
-        time--;
-    }, 1000);
-}
-
-stop = (btn1,btn2) => {
-    document.getElementsByClassName(btn1)[0].hidden = false;
-    document.getElementsByClassName(btn2)[0].hidden = true;
-    clearInterval(i);
-}
 window.onload = () => {
-    
-    
-    if (day == 0) {
-    document.getElementsByClassName('day')[0].innerHTML = "Sunday";
-    document.getElementsByClassName('containersun')[0].hidden = false;
-    document.getElementsByClassName('containermon')[0].hidden = true;
-    document.getElementsByClassName('containertue')[0].hidden = true;
-    document.getElementsByClassName('containerwed')[0].hidden = true;
-    document.getElementsByClassName('containerthur')[0].hidden =true;
-    document.getElementsByClassName('containerfri')[0].hidden = true;
-    document.getElementsByClassName('containersat')[0].hidden = true;
+    switch (day) {
+    case 0:
+        document.getElementsByClassName('day')[0].innerHTML = "Sunday";
+        showOnly("containersun");
+        break;
 
-}  else if (day == 1) {
-    document.getElementsByClassName('day')[0].innerHTML = "Monday";
-    document.getElementsByClassName('containermon')[0].hidden = false;
-    document.getElementsByClassName('containertue')[0].hidden = true;
-    document.getElementsByClassName('containerwed')[0].hidden = true;
-    document.getElementsByClassName('containerthur')[0].hidden =true;
-    document.getElementsByClassName('containerfri')[0].hidden = true;
-    document.getElementsByClassName('containersat')[0].hidden = true;
-    document.getElementsByClassName('containersun')[0].hidden = true;
-}   else if (day == 2) {
-    document.getElementsByClassName('day')[0].innerHTML = "Tuesday";
-    document.getElementsByClassName('containermon')[0].hidden = true;
-    document.getElementsByClassName('containertue')[0].hidden = false;
-    document.getElementsByClassName('containerwed')[0].hidden = true;
-    document.getElementsByClassName('containerthur')[0].hidden =true;
-    document.getElementsByClassName('containerfri')[0].hidden = true;
-    document.getElementsByClassName('containersat')[0].hidden = true;
-    document.getElementsByClassName('containersun')[0].hidden = true;
-}   else if (day == 3) {
-    document.getElementsByClassName('day')[0].innerHTML = "Wednesday";
-    document.getElementsByClassName('containerwed')[0].hidden = false;
-    document.getElementsByClassName('containermon')[0].hidden = true;
-    document.getElementsByClassName('containertue')[0].hidden = true;
-    document.getElementsByClassName('containerthur')[0].hidden =true;
-    document.getElementsByClassName('containerfri')[0].hidden = true;
-    document.getElementsByClassName('containersat')[0].hidden = true;
-    document.getElementsByClassName('containersun')[0].hidden = true;
-}   else if (day == 4) {
-    document.getElementsByClassName('day')[0].innerHTML = "Thursday";
-    document.getElementsByClassName('containerthur')[0].hidden = false;
-    document.getElementsByClassName('containermon')[0].hidden = true;
-    document.getElementsByClassName('containertue')[0].hidden = true;
-    document.getElementsByClassName('containerwed')[0].hidden = true;
-    document.getElementsByClassName('containerfri')[0].hidden = true;
-    document.getElementsByClassName('containersat')[0].hidden = true;
-    document.getElementsByClassName('containersun')[0].hidden = true;
-}   else if (day == 5) {
-    document.getElementsByClassName('day')[0].innerHTML = "Friday";
-    document.getElementsByClassName('containerfri')[0].hidden = false;
-    document.getElementsByClassName('containermon')[0].hidden = true;
-    document.getElementsByClassName('containertue')[0].hidden = true;
-    document.getElementsByClassName('containerwed')[0].hidden = true;
-    document.getElementsByClassName('containerthur')[0].hidden =true;
-    document.getElementsByClassName('containersat')[0].hidden = true;
-    document.getElementsByClassName('containersun')[0].hidden = true;
-}   else if (day == 6) {
-    document.getElementsByClassName('day')[0].innerHTML = "Saturday";
-    document.getElementsByClassName('containersat')[0].hidden = false;    
-    document.getElementsByClassName('containermon')[0].hidden = true;
-    document.getElementsByClassName('containertue')[0].hidden = true;
-    document.getElementsByClassName('containerwed')[0].hidden = true;
-    document.getElementsByClassName('containerthur')[0].hidden =true;
-    document.getElementsByClassName('containerfri')[0].hidden = true;
-    document.getElementsByClassName('containersun')[0].hidden = true;
+    case 1:
+        document.getElementsByClassName('day')[0].innerHTML = "Monday";
+        showOnly("containermon");
+        break;
+
+    case 2:
+        document.getElementsByClassName('day')[0].innerHTML = "Tuesday";
+        showOnly("containertue");
+        break;
+
+    case 3:
+        document.getElementsByClassName('day')[0].innerHTML = "Wednesday";
+        showOnly("containerwed");
+        break;
+
+    case 4:
+        document.getElementsByClassName('day')[0].innerHTML = "Thursday";
+        showOnly("containerthur");
+        break;
+
+    case 5:
+        document.getElementsByClassName('day')[0].innerHTML = "Friday";
+        showOnly("containerfri");
+        break;
+
+    case 6:
+        document.getElementsByClassName('day')[0].innerHTML = "Saturday";
+        showOnly("containersat");
+        break;
 }
 }
